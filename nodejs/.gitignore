@@ -1,0 +1,6 @@
+/.ptp-sync/
+
+.project
+.settings/
+.ptp-sync-folder
+node_modules
