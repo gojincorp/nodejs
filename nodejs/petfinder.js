@@ -45,12 +45,8 @@ server.on('request', function(req, res) {
 	console.log('queryObj:  ', queryObj);
 	var location = queryObj.location; // ...need to handle error case here.
 	var breed = queryObj.breed; // ...need to handle error case here.
-	var gender = queryObj.gender; // ...need to handle error case here.
 	var callback = queryObj.callback; // ...need to handle error case here.
-	var action = queryObj.action;
-	var shelterId = queryObj.shelterId;
-	var offset = queryObj.offset;
-	var count = (queryObj.count) ? queryObj.count : 50;
+	var action = queryObj.action
 
 	/*
 	 * Select URL based on requested action
@@ -58,29 +54,18 @@ server.on('request', function(req, res) {
 	switch (action) {
 		case 'findShelters':
 			var urls = [
-				'http://api.petfinder.com/shelter.find?format=json&key=5aecd2abf90929bd01aad4e46282f529&count=' + count + '&location=' + location
-			];
-			break;
-		case 'getShelter':
-			var urls = [
-				'http://api.petfinder.com/shelter.get?format=json&key=5aecd2abf90929bd01aad4e46282f529&id=' + shelterId
+				"http://api.petfinder.com/shelter.find?format=json&key=5aecd2abf90929bd01aad4e46282f529&location=" + location
 			];
 			break;
 		case 'findBreeds':
 			var urls = [
-				'http://api.petfinder.com/breed.list?format=json&key=5aecd2abf90929bd01aad4e46282f529&animal=dog'
+				"http://api.petfinder.com/breed.list?format=json&key=5aecd2abf90929bd01aad4e46282f529&animal=dog"
 			];
 			break;
 		case 'findDogs':
 		default:
 			var urls = [
-				'http://api.petfinder.com/pet.find?format=json&key=5aecd2abf90929bd01aad4e46282f529'
-					+ '&offset=' + offset
-					+ '&count=' + count
-					+ '&location=' + location
-					+ '&animal=dog'
-					+ '&breed=' + breed
-					+ ((gender === 'A') ? '' : '&sex=' + gender)
+				"http://api.petfinder.com/pet.find?format=json&key=5aecd2abf90929bd01aad4e46282f529&location=" + location + '&animal=dog&breed=' + breed
 			];
 			break;
 	}
@@ -106,17 +91,12 @@ server.on('request', function(req, res) {
 			var rspStatusCode = parseInt(objRsp.petfinder.header.status.code.$t);
 			if (rspStatusCode !== 100) {
 			// Petfinder returned an error...
-				console.log(__filename + '::processJsonRes()...need to handle error cases here.');
-				res.end(callback + '(' + JSON.stringify({status: 200}) + ');', 'utf8');
+				console.log(__filename + "::processJsonRes()...need to handle error cases here.");
 				responseCnt++;
 			} else {
 				switch (action) {
 				case 'findShelters':
 					totalResults = totalResults.concat(objRsp.petfinder.shelters.shelter);
-					responseCnt++;
-					break;
-				case 'getShelter':
-					totalResults = totalResults.concat(objRsp.petfinder.shelter);
 					responseCnt++;
 					break;
 				case 'findDogs':
@@ -128,25 +108,22 @@ server.on('request', function(req, res) {
 					responseCnt++;
 					break;
 				}
-				console.log('%d results from path: ', totalResults.length, jsonRes.req.path);
+				console.log("%d results from path: ", totalResults.length, jsonRes.req.path);
 				
 				// After all URLs have been processed we can send back a response.
 				if (responseCnt === urls.length) {
-					console.log('All results have returned...total number of results is ', totalResults.length);
+					console.log("All results have returned...total number of results is ", totalResults.length);
 
 					switch (action) {
 					case 'findShelters':
-						res.end(callback + '(' + JSON.stringify({status: 100, shelters: totalResults}) + ');', 'utf8');
-						break;
-					case 'getShelter':
-						res.end(callback + '(' + JSON.stringify({status: 100, shelter: totalResults}) + ');', 'utf8');
+						res.end(callback + '(' + JSON.stringify({shelters: totalResults}) + ');', 'utf8');
 						break;
 					case 'findDogs':
-						res.end(callback + '(' + JSON.stringify({status: 100, lastOffset: objRsp.petfinder.lastOffset, pets: totalResults}) + ');', 'utf8');
+						res.end(callback + '(' + JSON.stringify({pets: totalResults}) + ');', 'utf8');
 						break;
-					case 'findBreeds':
-						res.end(callback + '(' + JSON.stringify({status: 100, breeds: totalResults}) + ');', 'utf8');
-						break;
+						case 'findBreeds':
+							res.end(callback + '(' + JSON.stringify({breeds: totalResults}) + ');', 'utf8');
+							break;
 					}
 				}
 			}
@@ -161,5 +138,5 @@ server.on('request', function(req, res) {
 var port = 7071;
 server.listen(port);
 server.once('listening', function() {
-	console.log('Hello World server listening on port %d', port);
+	console.log("PetFinder server listening on port %d", port);
 });
